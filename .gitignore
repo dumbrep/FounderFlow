@@ -8,6 +8,10 @@ wheels/
 
 # Virtual environments
 .venv
+servers/credentials.json
+servers/token.json
+
+meta_tokens
 
 
 .env 

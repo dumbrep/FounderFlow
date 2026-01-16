@@ -1,5 +1,6 @@
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from langgraph.prebuilt import create_react_agent
+#from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
@@ -7,22 +8,31 @@ import os
 import asyncio
 import json
 import uuid
-from langchain.schema import AIMessage
+from langchain_core.messages import AIMessage
+from langchain_openai import ChatOpenAI
 
 
 load_dotenv()
 
-api_key = os.getenv("GEMINI_API_KEY")
-os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 
-model =  ChatGoogleGenerativeAI(model="gemini-2.5-flash",api_key = api_key);
+# api_key = os.getenv("GEMINI_API_KEY")
+
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
+# model =  ChatGoogleGenerativeAI(model="gemini-2.5-flash")
 #model = ChatGroq(model="openai/gpt-oss-120b")
 # model = ChatOllama(model="llama3")
+model = ChatOpenAI(model="gpt-5.2")
+
 
 
 async def main():
     client = MultiServerMCPClient({
     "Email": {
+        "url": "http://localhost:8001/mcp",
+        "transport": "streamable_http"
+    },
+    "Instagram": {
         "url": "http://localhost:8000/mcp",
         "transport": "streamable_http"
     }
@@ -31,7 +41,7 @@ async def main():
 
     tools = await client.get_tools()
     # print("Available tools ", tools)
-    agent = create_react_agent(
+    agent = create_agent(
         model, tools
     )
 
@@ -49,11 +59,14 @@ async def main():
 
                                 2. Meet Scheduling.
                                     For Meet Scheduling task, you have to choose scheduleMeet tool to schedule the meet. 
+                                
+                                3. Posting image on Instagram.
+                                    For Posting image on Instagram, choose post_image tool
                             """
                 },
                 {
                     "role": "user",
-                    "content": "Send birthday wish to my friend prerna, tomorow is her birthdat, her email is  satputeprerna71@gmail.com "
+                    "content": "Schedule meet with prerna for feature review. Her email id is satputeprerna71@gmail.com"
                 }
             ]
         }

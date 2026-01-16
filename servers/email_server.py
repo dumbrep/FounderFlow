@@ -4,7 +4,7 @@ from mcp.server.fastmcp import FastMCP
 from dotenv import load_dotenv
 import os
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 import smtplib
 from email.message import EmailMessage
 import json
@@ -22,7 +22,9 @@ load_dotenv()
 
 api_key = os.getenv("GEMINI_API_KEY")
 
-mcp = FastMCP("Email")
+mcp = FastMCP(
+    "Email",
+    port=8001,)
 
 # model =  ChatGoogleGenerativeAI(model="gemini-2.5-flash",api_key = api_key);
 model = ChatOllama(model="llama3")
@@ -198,46 +200,56 @@ def send_email(data:dict):
 
 # function to schedule the meet
 SCOPES = ['https://www.googleapis.com/auth/calendar']
+
 def create_meet_event(eventInput: dict):
     creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    token_path = os.path.join(os.getcwd(), "token.json")
+    credentials_path = os.path.join(os.getcwd(), "credentials.json")
+
+    #  Load existing token if available
+    if os.path.exists(token_path):
+        creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+
+   
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file('D:\FounderFlow\SCHEDULE_MEETS\credentials.json', SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
             creds = flow.run_local_server(port=8080)
-        with open('token.json', 'w') as token:
+        with open(token_path, 'w') as token:
             token.write(creds.to_json())
 
+    # Build Calendar service
     service = build('calendar', 'v3', credentials=creds)
 
-    event = eventInput
-
+    # Create event
     event = service.events().insert(
         calendarId='primary',
-        body=event,
+        body=eventInput,
         conferenceDataVersion=1,
-    ).execute()  
+    ).execute()
+
     meet_link = event.get("hangoutLink") or event["conferenceData"]["entryPoints"][0]["uri"]
 
+    #  Send invitations to attendees
     for attendee in eventInput.get("attendees", []):
         send_email({
             "subject": f"Invitation: {event['summary']}",
             "body": f"""Hi,
 
-            You are invited to the following meeting:
+    You are invited to the following meeting:
 
-            📅 {event['summary']}
-            🕒 Starts: {event['start']['dateTime']}
-            🔗 Google Meet link: {meet_link}
+    📅 {event['summary']}
+    🕒 Starts: {event['start']['dateTime']}
+    🔗 Google Meet link: {meet_link}
 
-            See you there!
-            """,
-                    "destination_address": attendee["email"]
-        })
+    See you there!
+    """,
+                "destination_address": attendee["email"]
+            })
 
+    return CreateMeetResponse(success=True, message=f"Meeting scheduled successfully: {meet_link}")
 
 # Tools 
 
@@ -283,8 +295,10 @@ def scheduleMeet(args : CreateMeetArgs)->CreateMeetResponse:
 
 
 if __name__== "__main__":
-    print("Starting MCP server with tools:")
-    mcp.run(transport="streamable-http")
+    mcp.run(
+        transport="streamable-http",
+        
+    )
 
 
 
