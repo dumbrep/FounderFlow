@@ -40,11 +40,6 @@ class ComposeEmailArgs(BaseModel):
     feedback: str | None
     original_request: str
 
-
-
-# model =  ChatGoogleGenerativeAI(model="gemini-2.5-flash",api_key = api_key);
-# model = ChatOllama(model="llama3")
-
 model = ChatOpenAI(
         model="gpt-5.2",
         temperature=0
