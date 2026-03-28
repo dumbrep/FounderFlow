@@ -198,8 +198,6 @@ async def main():
     - If revision needed, regenerate with feedback
     - After approval call postLinkedIn
         
-
-
     Never respond with plain text if a tool can be used.
 """
 
