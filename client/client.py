@@ -150,7 +150,7 @@ async def main():
 
     tool_node = ToolNode(tools)
 
-    graph = StateGraph(AgentState)
+    graph = StateGraph[AgentState, None, AgentState, AgentState](AgentState)
 
     graph.add_node("agent", agent_node)
     graph.add_node("tools", tool_node)
@@ -198,6 +198,7 @@ async def main():
     - If revision needed, regenerate with feedback
     - After approval call postLinkedIn
         
+
 
     Never respond with plain text if a tool can be used.
 """
