@@ -34,11 +34,13 @@ class AgentState(TypedDict):
     messages:  Annotated[list, add_messages]
     previous_draft: dict | None
     image_url : str | None
+    linkedin_draft: dict | None
 
 TOOL_STATE_MAP = {
     "composeEmail": "email_draft",
     "createImage": "image_url",
     "scheduleMeet": "meet_result",
+    "generateLinkedInPost": "linkedin_draft",
 }
 
 TOOL_OUTPUT_TYPE = {
@@ -125,7 +127,11 @@ async def main():
             "Instagram": {
                 "url": "http://localhost:8000/mcp",
                 "transport": "streamable_http"
-            }
+            },
+            "LinkedIn": {   
+            "url": "http://localhost:8003/mcp",
+            "transport": "streamable_http"
+        }
         }
     )
 
@@ -185,6 +191,13 @@ async def main():
         - Wait for human approval
         - If human needs some changes, send human human feedback again to createImage tool
         - After confirmation, call postImage tool. postImage requires the image_url parameter
+
+    LinkedIn workflow:
+    - Call generateLinkedInPost
+    - Wait for human approval
+    - If revision needed, regenerate with feedback
+    - After approval call postLinkedIn
+        
 
     Never respond with plain text if a tool can be used.
 """
