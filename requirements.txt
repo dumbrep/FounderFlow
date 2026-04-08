@@ -8,4 +8,7 @@ langchain-core
 langchain-ollama
 langchain-openai
 google_auth_oauthlib
-googleapiclient
+fastapi
+uvicorn[standard]
+aiohttp
+rapidfuzz
