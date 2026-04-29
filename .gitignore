@@ -92,6 +92,8 @@ meta_tokens/
 *.pem
 *.key
 
+backend/servers/token.json
+
 # =========================
 
 # 🐳 Docker (if used)
