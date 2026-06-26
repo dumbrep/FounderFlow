@@ -85,7 +85,7 @@ out/
 # 🔑 Secrets / Credentials
 
 # =========================
-
+backend/servers/credentials.json
 servers/credentials.json
 servers/token.json
 meta_tokens/
