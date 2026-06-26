@@ -50,7 +50,7 @@ class ComposeEmailArgs(BaseModel):
     original_request: str
 
 model = ChatOpenAI(
-        model="gpt-5.2",
+        model="gpt-4o-mini",
         temperature=0
     ).with_structured_output(EmailDraft)
 

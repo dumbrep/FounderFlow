@@ -15,7 +15,7 @@ PROXYCURL_API_KEY = os.getenv("PROXYCURL_API_KEY", "")
 NEWSAPI_KEY = os.getenv("NEWSAPI_KEY", "")
 
 # ─── LLM Settings ────────────────────────────────────────────────────────────
-LLM_MODEL = os.getenv("LEAD_GEN_LLM_MODEL", "gpt-4o")
+LLM_MODEL = os.getenv("LEAD_GEN_LLM_MODEL", "gpt-4o-mini")
 LLM_TEMPERATURE = 0
 
 # ─── Crawler Settings ────────────────────────────────────────────────────────

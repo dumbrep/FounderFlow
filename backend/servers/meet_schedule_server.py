@@ -35,7 +35,7 @@ mcp = FastMCP(
 
 
 model = ChatOpenAI(
-        model="gpt-5.2",
+        model="gpt-4o-mini",
         temperature=0
     )
 

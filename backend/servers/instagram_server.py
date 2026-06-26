@@ -37,23 +37,24 @@ def createImage(user_instrucion:str):
     logger.info("[createImage] TOOL CALLED — prompt=%r", user_instrucion)
     try:
         result = client.images.generate(
-                model="dall-e-3",
+                model="gpt-image-1-mini",
                 prompt=user_instrucion,
-                size="1024x1024"
+                size="1024x1024",
             )
     except Exception as e:
         logger.exception("[createImage] OpenAI image generation failed: %s", e)
         return {"success": False, "message": f"Image generation failed: {e}"}
 
-    image_url = result.data[0].url
-    if not image_url:
-        logger.error("[createImage] No URL returned by OpenAI")
+    image_b64 = result.data[0].b64_json
+    if not image_b64:
+        logger.error("[createImage] No image data returned by OpenAI")
         return {
                 "success" : False,
                 "message" :"Image generation failed"
             }
-    logger.info("[createImage] SUCCESS — url=%s", image_url)
-    return image_url
+    image_data_uri = f"data:image/png;base64,{image_b64}"
+    logger.info("[createImage] SUCCESS — url=%s", image_data_uri[:80])
+    return image_data_uri
     
 @mcp.tool(name = "postImage")
 def post_image(image_url):

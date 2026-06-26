@@ -21,6 +21,8 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from pydantic import BaseModel
 from pymongo import MongoClient
 
+from auth import create_user, authenticate_user
+
 from client.client import (
     create_agent_app,
     get_tool_name,
@@ -143,6 +145,25 @@ class ChatResponse(BaseModel):
     message:          str
     needs_approval:   bool = False
     approval_summary: Optional[str] = None
+
+
+# ── Auth request models ──────────────────────────────────────
+
+class SignupRequest(BaseModel):
+    username: str
+    email:    str
+    password: str
+
+
+class LoginRequest(BaseModel):
+    email:    str
+    password: str
+
+
+class AuthResponse(BaseModel):
+    id:       str
+    username: str
+    email:    str
 
 
 # ──────────────────────────────────────────────────────────────
@@ -351,6 +372,31 @@ async def health():
         "active_sessions": len(_sessions),
         "agent_ready": _agent_app is not None,
     }
+
+
+# ──────────────────────────────────────────────────────────────
+# Auth endpoints
+# ──────────────────────────────────────────────────────────────
+
+@app.post("/signup", response_model=AuthResponse)
+async def signup(req: SignupRequest):
+    user = create_user(req.username.strip(), req.email.strip().lower(), req.password)
+    if user is None:
+        raise HTTPException(status_code=409, detail="Email already registered")
+    return user
+
+
+@app.post("/login", response_model=AuthResponse)
+async def login(req: LoginRequest):
+    user = authenticate_user(req.email.strip().lower(), req.password)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    return user
+
+
+@app.post("/logout")
+async def logout():
+    return {"message": "Logged out successfully"}
 
 
 @app.delete("/session/{session_id}")

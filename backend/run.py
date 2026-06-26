@@ -20,8 +20,12 @@ SERVERS = [
     "instagram_server.py",
     "linkedIn_Mcpserver.py",
     "meet_schedule_server.py",
-    "lead_gen/lead_gen_server.py"
+    "lead_gen/lead_gen_server.py",
 ]
+
+# FastAPI app to run with uvicorn on port 8080
+UVICORN_APP = "app.py"
+UVICORN_PORT = 8080
 
 def _watch_dirs_for_server(server_file):
     """Return the directories to watch for a given server file."""
@@ -102,6 +106,22 @@ def main():
             run_server_in_new_terminal(server_file)
         else:
             print(f"⚠ Warning: {server_file} not found, skipping...")
+    
+    # Launch FastAPI app with uvicorn on port 8080
+    app_path = PROJECT_ROOT / UVICORN_APP
+    if app_path.exists():
+        python_command = f'"{VENV_PYTHON}" -m uvicorn app:app --host 0.0.0.0 --port {UVICORN_PORT} --reload'
+        command = (
+            f'powershell -NoExit -Command "'
+            f'Write-Host \"Starting FastAPI App on port {UVICORN_PORT} [auto-reload]...\" -ForegroundColor Green; '
+            f'Set-Location \"{PROJECT_ROOT}\"; '
+            f'{python_command}'
+            f'"'
+        )
+        subprocess.Popen(command, shell=True, cwd=str(PROJECT_ROOT))
+        print(f"✓ Launched FastAPI App on port {UVICORN_PORT} in new terminal (auto-reload enabled)")
+    else:
+        print(f"⚠ Warning: {UVICORN_APP} not found, skipping FastAPI app...")
     
     print("\n" + "=" * 60)
     print("All servers launched successfully! (auto-reload enabled)")

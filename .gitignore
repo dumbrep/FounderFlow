@@ -111,3 +111,4 @@ docker-compose.override.yml
 *.swp
 *.swo
 *.tmp
+backend/servers/credentials.json
